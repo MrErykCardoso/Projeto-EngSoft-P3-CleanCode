@@ -1,0 +1,5 @@
+# Ignorar todas as pastas node_modules
+**/node_modules/
+
+# Ignorar todas as pastas venv
+**/venv/
