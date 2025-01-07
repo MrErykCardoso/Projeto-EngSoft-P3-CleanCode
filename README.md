@@ -1,5 +1,7 @@
 # Projeto-TCC---NoCleanCode
 
+localgroup docker-users "user-id" /ADD
+
 # criar uma imagem do docker Linux/MacOS
 sudo docker run --name mysql-database \
   -e MYSQL_ROOT_PASSWORD=root123 \
