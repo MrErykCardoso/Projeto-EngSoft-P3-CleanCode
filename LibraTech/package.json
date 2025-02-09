@@ -12,6 +12,6 @@
   "license": "MIT",
   "dependencies": {
     "inquirer": "^8.2.6",
-    "mysql2": "^3.11.4"
+    "mysql2": "^3.6.0"
   }
 }
