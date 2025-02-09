@@ -1,3 +1,4 @@
+-- Active: 1736264737283@@127.0.0.1@3307@mysqlDatabase
 -- criar banco de dados para o LibraTech
 CREATE DATABASE libra_tech;
 
