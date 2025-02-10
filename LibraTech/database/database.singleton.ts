@@ -1,4 +1,4 @@
-import { IDatabaseConnection } from "../interfaces/interfaces";
+import { IDatabaseConnection } from "../interfaces/library.interfaces";
 import * as mysql from "mysql2/promise";
 
 export class Database implements IDatabaseConnection {

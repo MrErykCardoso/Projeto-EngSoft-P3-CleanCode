@@ -1,13 +1,29 @@
+import { Book } from "../models/library.models";
+
 export interface IDatabaseConnection {
   query<T>(sql: string, params?: any[]): Promise<T[]>;
   execute(sql: string, params?: any[]): Promise<any>;
+}
+
+export interface IBookSearchStrategy {
+  search(books: Book[], term: string): Book[];
+}
+
+export interface IObserver {
+  update(data: any): void;
+}
+
+export interface ISubject {
+  registerObserver(observer: IObserver): void;
+  removeObserver(observer: IObserver): void;
+  notifyObservers(observer: IObserver): void;
 }
 
 export interface IBook {
   id: number;
   title: string;
   author: string;
-  isnb: string;
+  isbn: string;
   category: string;
 }
 
