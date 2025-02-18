@@ -36,7 +36,8 @@ function main() {
                 'Cadastrar livro',
                 'Cadastrar usuario',
                 'Fazer uma reserva',
-                'Buscar um livro',
+                'Ver reservas',
+                'Buscar um livro',            
                 'Sair'
             ]
         }
@@ -49,11 +50,13 @@ function main() {
             cadastrarUsuario();
         } else if (action === 'Fazer uma reserva') {
             fazerReserva();
-        } else if (action === 'Buscar um livro') {
+        }else if (action === 'Ver reservas') {
+            listarReservas();
+        }else if (action === 'Buscar um livro') {
             buscarLivro();
         } else if (action === 'Sair') {
             console.log("Saindo...");
-            process.exit();
+            process.exit();            
         }
     }).catch((error) => {
         console.error('Erro ao executar a operação:', error);
@@ -129,6 +132,45 @@ async function fazerReserva() {
         console.log("Erro ao realizar reserva");
     } finally {
         main();
+    }
+}
+// Função para listar as reservas
+async function listarReservas() {
+    try {
+        console.log("Função listarReservas chamada."); // Log 1: Verifica se a função está sendo chamada
+
+        const query = `
+            SELECT 
+                reservations.id AS reserva_id,
+                users.name AS usuario,
+                books.name AS livro,
+                books.author AS autor
+            FROM reservations
+            INNER JOIN users ON reservations.userId = users.id
+            INNER JOIN books ON reservations.bookId = books.id
+        `;
+
+        console.log("Executando consulta SQL..."); // Log 2: Verifica se a consulta está sendo executada
+        const reservations = await executeQuery(query);
+
+        console.log("Resultados da consulta:", reservations); // Log 3: Exibe os resultados da consulta
+
+        if (reservations.length === 0) {
+            console.log("Nenhuma reserva encontrada.");
+            return;
+        }
+
+        console.log("\n=== Reservas ===\n");
+        reservations.forEach(reserva => {
+            console.log(`ID da Reserva: ${reserva.reserva_id}`);
+            console.log(`Usuário: ${reserva.usuario}`);
+            console.log(`Livro: ${reserva.livro} (Autor: ${reserva.autor})`);
+            console.log("----------------------");
+        });
+    } catch (error) {
+        console.error("Erro ao buscar reservas:", error);
+    } finally {
+        main(); // Volta ao menu principal
     }
 }
 
