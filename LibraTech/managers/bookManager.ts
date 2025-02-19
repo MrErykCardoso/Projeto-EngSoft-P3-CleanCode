@@ -1,8 +1,8 @@
 import {
   IDatabaseConnection,
   IBookSearchStrategy,
-} from "../interfaces/library.interfaces";
-import { Book } from "../models/library.models";
+} from "../interfaces/library.interfaces.js";
+import { Book } from "../models/library.models.js";
 
 export class BookManager {
   private books: Book[] = [];
@@ -24,4 +24,10 @@ export class BookManager {
   public searchBooks(term: string, strategy: IBookSearchStrategy): Book[] {
     return strategy.search(this.books, term);
   }
+
+  public async findBookByTitle(title: string): Promise<Book | null> {
+    const books = await this.db.query<Book>("SELECT * FROM books WHERE title = ?", [title]);
+    return books.length > 0 ? books[0] : null;
+  }
+  
 }

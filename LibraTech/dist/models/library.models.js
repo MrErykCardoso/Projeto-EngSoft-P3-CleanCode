@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SearchByCategoryStrategy = exports.SearByAuthorStrategy = exports.SearchByTitleStrategy = exports.Reservation = exports.User = exports.Book = void 0;
 //------------------------------------------------------------------
 //System Classes
-class Book {
+export class Book {
     constructor(id, title, author, isbn, category) {
         this.id = id;
         this.title = title;
@@ -12,8 +9,7 @@ class Book {
         this.category = category;
     }
 }
-exports.Book = Book;
-class User {
+export class User {
     constructor(id, name, email, phone) {
         this.id = id;
         this.name = name;
@@ -21,8 +17,7 @@ class User {
         this.phone = phone;
     }
 }
-exports.User = User;
-class Reservation {
+export class Reservation {
     constructor(id, bookId, userId, reservationDate) {
         this.id = id;
         this.bookId = bookId;
@@ -30,24 +25,20 @@ class Reservation {
         this.reservationDate = reservationDate;
     }
 }
-exports.Reservation = Reservation;
 //------------------------------------------------------------------------------
 //Strategy
-class SearchByTitleStrategy {
+export class SearchByTitleStrategy {
     search(books, term) {
         return books.filter((book) => book.title.toLowerCase().includes(term.toLowerCase()));
     }
 }
-exports.SearchByTitleStrategy = SearchByTitleStrategy;
-class SearByAuthorStrategy {
+export class SearchByAuthorStrategy {
     search(books, term) {
         return books.filter((book) => book.author.toLowerCase().includes(term.toLowerCase()));
     }
 }
-exports.SearByAuthorStrategy = SearByAuthorStrategy;
-class SearchByCategoryStrategy {
+export class SearchByCategoryStrategy {
     search(books, term) {
         return books.filter((book) => book.category.toLowerCase().includes(term.toLowerCase()));
     }
 }
-exports.SearchByCategoryStrategy = SearchByCategoryStrategy;

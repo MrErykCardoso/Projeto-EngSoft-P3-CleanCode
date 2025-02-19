@@ -1,4 +1,4 @@
-import { IDatabaseConnection } from "../interfaces/library.interfaces";
+import { IDatabaseConnection } from "../interfaces/library.interfaces.js";
 import * as mysql from "mysql2/promise";
 
 export class Database implements IDatabaseConnection {
@@ -42,4 +42,9 @@ export class Database implements IDatabaseConnection {
     const [result] = await pool.execute(sql, params);
     return result;
   }
+  public async disconnect(): Promise<void> {
+    await this.connection.end();
+    console.log("🔌 Conexão com o banco encerrada.");
+  }
+  
 }

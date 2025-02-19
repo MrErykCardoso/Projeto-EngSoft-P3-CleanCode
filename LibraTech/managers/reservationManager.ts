@@ -1,7 +1,7 @@
-import { IDatabaseConnection } from "../interfaces/library.interfaces";
-import { Reservation } from "../models/library.models";
-import { ISubject } from "../interfaces/library.interfaces";
-import { IObserver } from "../interfaces/library.interfaces";
+import { IDatabaseConnection } from "../interfaces/library.interfaces.js";
+import { Reservation } from "../models/library.models.js";
+import { ISubject } from "../interfaces/library.interfaces.js";
+import { IObserver } from "../interfaces/library.interfaces.js";
 
 export class ReservationManager implements ISubject {
   private reservations: Reservation[] = [];
@@ -18,6 +18,10 @@ export class ReservationManager implements ISubject {
     this.reservations.push(reservation);
     this.notifyObservers(reservation);
   }
+  public async listReservations(): Promise<Reservation[]> {
+    return await this.db.query<Reservation>("SELECT * FROM reservations");
+  }
+  
 
   // Métodos do Observer:
   public registerObserver(observer: IObserver): void {
@@ -31,4 +35,6 @@ export class ReservationManager implements ISubject {
   public notifyObservers(data: any): void {
     this.observers.forEach((observer) => observer.update(data));
   }
+  
+  
 }

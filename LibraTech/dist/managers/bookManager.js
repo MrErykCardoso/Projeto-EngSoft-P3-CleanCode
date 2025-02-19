@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.BookManager = void 0;
-class BookManager {
+export class BookManager {
     constructor(db) {
         this.db = db;
         this.books = [];
@@ -16,5 +13,8 @@ class BookManager {
     searchBooks(term, strategy) {
         return strategy.search(this.books, term);
     }
+    async findBookByTitle(title) {
+        const books = await this.db.query("SELECT * FROM books WHERE title = ?", [title]);
+        return books.length > 0 ? books[0] : null;
+    }
 }
-exports.BookManager = BookManager;

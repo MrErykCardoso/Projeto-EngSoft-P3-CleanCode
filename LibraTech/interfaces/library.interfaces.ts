@@ -1,4 +1,4 @@
-import { Book } from "../models/library.models";
+import { Book } from "../models/library.models.js";
 
 export interface IDatabaseConnection {
   query<T>(sql: string, params?: any[]): Promise<T[]>;

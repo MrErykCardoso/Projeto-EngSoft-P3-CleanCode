@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReservationManager = void 0;
-class ReservationManager {
+export class ReservationManager {
     constructor(db) {
         this.db = db;
         this.reservations = [];
@@ -12,6 +9,9 @@ class ReservationManager {
         await this.db.execute("INSERT INTO reservations (bookId, userId, reservationDate) VALUES (?, ?, ?)", [reservation.bookId, reservation.userId, reservation.reservationDate]);
         this.reservations.push(reservation);
         this.notifyObservers(reservation);
+    }
+    async listReservations() {
+        return await this.db.query("SELECT * FROM reservations");
     }
     // Métodos do Observer:
     registerObserver(observer) {
@@ -24,4 +24,3 @@ class ReservationManager {
         this.observers.forEach((observer) => observer.update(data));
     }
 }
-exports.ReservationManager = ReservationManager;

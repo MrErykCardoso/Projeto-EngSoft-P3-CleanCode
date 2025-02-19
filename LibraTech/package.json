@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc && node ./dist/index.js"
@@ -13,5 +13,9 @@
   "dependencies": {
     "inquirer": "^8.2.6",
     "mysql2": "^3.6.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.13.4"
   }
 }

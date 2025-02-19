@@ -1,31 +1,156 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const database_singleton_1 = require("./database/database.singleton");
-const bookManager_1 = require("./managers/bookManager");
-const userManager_1 = require("./managers/userManager");
-const reservationManager_1 = require("./managers/reservationManager");
-const library_models_1 = require("./models/library.models");
-const library_models_2 = require("./models/library.models");
-//Instância Database
-const db = database_singleton_1.Database.getInstance();
-// Injetar a dependência nos managers (aplicando DIP)
-const bookManager = new bookManager_1.BookManager(db);
-const userManager = new userManager_1.UserManager(db);
-const reservationManager = new reservationManager_1.ReservationManager(db);
-// Exemplo de uso do BookManager com Strategy:
-const newBook = new library_models_2.Book(1, "O Senhor dos Anéis", "J.R.R. Tolkien", "123456789", "Fantasia");
-bookManager.addBook(newBook);
-const foundBooks = bookManager.searchBooks("senhor", new library_models_1.SearchByTitleStrategy());
-console.log("Livros encontrados:", foundBooks);
-// Exemplo de Observer:
-// Observador para reservas
-class ReservationLogger {
-    update(data) {
-        console.log("Nova reserva criada:", data);
+import { Database } from "./database/database.singleton.js";
+import { BookManager } from "./managers/bookManager.js";
+import { UserManager } from "./managers/userManager.js";
+import { ReservationManager } from "./managers/reservationManager.js";
+import { SearchByTitleStrategy, SearchByAuthorStrategy, SearchByCategoryStrategy, Reservation, Book, User } from "./models/library.models.js";
+// Inicialização do banco e managers
+const db = Database.getInstance();
+const bookManager = new BookManager(db);
+const userManager = new UserManager(db);
+const reservationManager = new ReservationManager(db);
+async function mainMenu() {
+    while (true) {
+        const inquirer = (await import("inquirer")).default; // Importação dinâmica
+        const { action } = await inquirer.prompt([
+            {
+                type: "list",
+                name: "action",
+                message: "O que deseja fazer?",
+                choices: [
+                    "Cadastrar livro",
+                    "Cadastrar usuário",
+                    "Fazer uma reserva",
+                    "Ver reservas",
+                    "Buscar um livro",
+                    "Sair",
+                ],
+            },
+        ]);
+        switch (action) {
+            case "Cadastrar livro":
+                await cadastrarLivro();
+                break;
+            case "Cadastrar usuário":
+                await cadastrarUsuario();
+                break;
+            case "Fazer uma reserva":
+                await fazerReserva();
+                break;
+            case "Ver reservas":
+                await listarReservas();
+                break;
+            case "Buscar um livro":
+                await buscarLivro();
+                break;
+            case "Sair":
+                console.log("🔌 Conexão encerrada.");
+                await db.disconnect();
+                return;
+        }
     }
 }
-const logger = new ReservationLogger();
-reservationManager.registerObserver(logger);
-//logger
-const reservation = new library_models_1.Reservation(1, newBook.id, 1, new Date());
-reservationManager.createReservation(reservation);
+async function cadastrarLivro() {
+    const inquirer = (await import("inquirer")).default;
+    const answers = await inquirer.prompt([
+        { name: "title", message: "Digite o título do livro:" },
+        { name: "author", message: "Digite o autor do livro:" },
+        { name: "isbn", message: "Digite o ISBN do livro:" },
+        {
+            type: "list",
+            name: "category",
+            message: "Escolha a categoria:",
+            choices: ["Esporte", "Ficção", "Educação", "Fantasia", "Diversa"],
+        },
+    ]);
+    const newBook = new Book(0, answers.title, answers.author, answers.isbn, answers.category);
+    await bookManager.addBook(newBook);
+    console.log("✅ Livro cadastrado com sucesso!");
+}
+async function cadastrarUsuario() {
+    const inquirer = (await import("inquirer")).default;
+    const answers = await inquirer.prompt([
+        { name: "name", message: "Digite o nome do usuário:" },
+        { name: "email", message: "Digite o email do usuário:" },
+        { name: "phone", message: "Digite o telefone do usuário:" },
+    ]);
+    const newUser = new User(0, answers.name, answers.email, answers.phone);
+    await userManager.addUser(newUser);
+    console.log("✅ Usuário cadastrado com sucesso!");
+}
+async function fazerReserva() {
+    const inquirer = (await import("inquirer")).default;
+    const { userEmail } = await inquirer.prompt([{ name: "userEmail", message: "Digite o email do usuário:" }]);
+    const user = await userManager.findUserByEmail(userEmail);
+    if (!user) {
+        console.log("❌ Usuário não encontrado.");
+        return;
+    }
+    const { bookTitle } = await inquirer.prompt([{ name: "bookTitle", message: "Digite o título do livro:" }]);
+    const book = await bookManager.findBookByTitle(bookTitle);
+    if (!book) {
+        console.log("❌ Livro não encontrado.");
+        return;
+    }
+    const reservation = new Reservation(0, book.id, user.id, new Date());
+    await reservationManager.createReservation(reservation);
+    console.log("✅ Reserva realizada com sucesso!");
+}
+async function listarReservas() {
+    const reservations = await reservationManager.listReservations();
+    if (reservations.length === 0) {
+        console.log("Nenhuma reserva encontrada.");
+        return;
+    }
+    console.log("\n=== Reservas ===\n");
+    reservations.forEach((reserva) => {
+        console.log(`ID: ${reserva.id}, Usuário: ${reserva.userId}, Livro: ${reserva.bookId}, Data: ${reserva.reservationDate}`);
+        console.log("----------------------");
+    });
+}
+async function buscarLivro() {
+    const inquirer = (await import("inquirer")).default;
+    const { searchType } = await inquirer.prompt([
+        {
+            type: "list",
+            name: "searchType",
+            message: "Como deseja buscar?",
+            choices: ["Título", "Autor", "Categoria"],
+        },
+    ]);
+    let strategy;
+    let param;
+    if (searchType === "Título") {
+        const { bookTitle } = await inquirer.prompt([{ name: "bookTitle", message: "Digite o título do livro:" }]);
+        strategy = new SearchByTitleStrategy();
+        param = bookTitle;
+    }
+    else if (searchType === "Autor") {
+        const { authorName } = await inquirer.prompt([{ name: "authorName", message: "Digite o nome do autor:" }]);
+        strategy = new SearchByAuthorStrategy();
+        param = authorName;
+    }
+    else {
+        const { category } = await inquirer.prompt([
+            {
+                type: "list",
+                name: "category",
+                message: "Escolha a categoria:",
+                choices: ["Esporte", "Ficção", "Educação", "Fantasia", "Diversa"],
+            },
+        ]);
+        strategy = new SearchByCategoryStrategy();
+        param = category;
+    }
+    const books = await bookManager.searchBooks(param, strategy);
+    if (books.length === 0) {
+        console.log("Nenhum livro encontrado.");
+    }
+    else {
+        console.log("📚 Livros encontrados:");
+        books.forEach((book) => console.log(`Título: ${book.title}, Autor: ${book.author}, Categoria: ${book.category}`));
+    }
+}
+// Executar a função principal
+(async () => {
+    await mainMenu();
+})();
