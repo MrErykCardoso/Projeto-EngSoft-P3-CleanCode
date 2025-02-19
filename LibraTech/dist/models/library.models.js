@@ -1,5 +1,5 @@
 //------------------------------------------------------------------
-//System Classes
+// System Classes
 export class Book {
     constructor(id, title, author, isbn, category) {
         this.id = id;
@@ -7,6 +7,8 @@ export class Book {
         this.author = author;
         this.isbn = isbn;
         this.category = category;
+        // Remove hífens e espaços do isbn para não dar erro!
+        this.isbn = isbn.replace(/[-\s]/g, "");
     }
 }
 export class User {
@@ -26,19 +28,36 @@ export class Reservation {
     }
 }
 //------------------------------------------------------------------------------
-//Strategy
-export class SearchByTitleStrategy {
+// Strategy
+class BaseSearchStrategy {
+    // Método para normalizar o termo de busca
+    normalizeTerm(term) {
+        return term
+            .trim() // Remove espaços em branco no início e no final
+            .replace(/\s+/g, " ") // Substitui múltiplos espaços por um único espaço
+            .toLowerCase(); // Converte para minúsculas
+    }
     search(books, term) {
-        return books.filter((book) => book.title.toLowerCase().includes(term.toLowerCase()));
+        const normalizedTerm = this.normalizeTerm(term);
+        return books.filter((book) => {
+            const propertyValue = this.getProperty(book);
+            const normalizedProperty = this.normalizeTerm(propertyValue);
+            return normalizedProperty.includes(normalizedTerm);
+        });
     }
 }
-export class SearchByAuthorStrategy {
-    search(books, term) {
-        return books.filter((book) => book.author.toLowerCase().includes(term.toLowerCase()));
+export class SearchByTitleStrategy extends BaseSearchStrategy {
+    getProperty(book) {
+        return book.title;
     }
 }
-export class SearchByCategoryStrategy {
-    search(books, term) {
-        return books.filter((book) => book.category.toLowerCase().includes(term.toLowerCase()));
+export class SearchByAuthorStrategy extends BaseSearchStrategy {
+    getProperty(book) {
+        return book.author;
+    }
+}
+export class SearchByCategoryStrategy extends BaseSearchStrategy {
+    getProperty(book) {
+        return book.category;
     }
 }

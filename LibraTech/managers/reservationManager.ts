@@ -1,29 +1,50 @@
-import { IDatabaseConnection } from "../interfaces/library.interfaces.js";
+import { 
+  IDatabaseConnection,
+  ISubject,
+  IObserver,
+  IReservationDetails 
+} from "../interfaces/library.interfaces.js";
 import { Reservation } from "../models/library.models.js";
-import { ISubject } from "../interfaces/library.interfaces.js";
-import { IObserver } from "../interfaces/library.interfaces.js";
 
 export class ReservationManager implements ISubject {
-  private reservations: Reservation[] = [];
   private observers: IObserver[] = [];
 
   constructor(private db: IDatabaseConnection) {}
+    // ===============================================
+  // Métodos de Reserva 
+   // ===============================================
 
-  // Cria uma nova reserva e notifica os observadores
   public async createReservation(reservation: Reservation): Promise<void> {
-    await this.db.execute(
-      "INSERT INTO reservations (bookId, userId, reservationDate) VALUES (?, ?, ?)",
-      [reservation.bookId, reservation.userId, reservation.reservationDate]
-    );
-    this.reservations.push(reservation);
-    this.notifyObservers(reservation);
+    try {
+      await this.db.execute(
+        `INSERT INTO reservations (bookId, userId, reservationDate)
+         VALUES (?, ?, ?)`,
+        [reservation.bookId, reservation.userId, reservation.reservationDate]
+      );
+      this.notifyObservers(reservation);
+    } catch (error) {
+      throw new Error(`Erro ao criar reserva: ${(error as Error).message}`);
+    }
   }
-  public async listReservations(): Promise<Reservation[]> {
-    return await this.db.query<Reservation>("SELECT * FROM reservations");
-  }
-  
 
-  // Métodos do Observer:
+  public async listReservations(): Promise<IReservationDetails[]> {
+    return this.db.query<IReservationDetails>(`
+      SELECT 
+        r.id,
+        r.bookId,
+        r.userId,
+        r.reservationDate,
+        u.name as userName,
+        b.title as bookTitle
+      FROM reservations r
+      INNER JOIN users u ON r.userId = u.id
+      INNER JOIN books b ON r.bookId = b.id
+    `);
+  }
+    // ===============================================
+  // Métodos do Observer 
+   // ===============================================
+
   public registerObserver(observer: IObserver): void {
     this.observers.push(observer);
   }
@@ -35,6 +56,4 @@ export class ReservationManager implements ISubject {
   public notifyObservers(data: any): void {
     this.observers.forEach((observer) => observer.update(data));
   }
-  
-  
 }

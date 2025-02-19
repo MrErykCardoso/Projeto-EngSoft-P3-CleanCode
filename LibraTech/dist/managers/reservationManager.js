@@ -1,19 +1,38 @@
 export class ReservationManager {
     constructor(db) {
         this.db = db;
-        this.reservations = [];
         this.observers = [];
     }
-    // Cria uma nova reserva e notifica os observadores
+    // ===============================================
+    // Métodos de Reserva 
+    // ===============================================
     async createReservation(reservation) {
-        await this.db.execute("INSERT INTO reservations (bookId, userId, reservationDate) VALUES (?, ?, ?)", [reservation.bookId, reservation.userId, reservation.reservationDate]);
-        this.reservations.push(reservation);
-        this.notifyObservers(reservation);
+        try {
+            await this.db.execute(`INSERT INTO reservations (bookId, userId, reservationDate)
+         VALUES (?, ?, ?)`, [reservation.bookId, reservation.userId, reservation.reservationDate]);
+            this.notifyObservers(reservation);
+        }
+        catch (error) {
+            throw new Error(`Erro ao criar reserva: ${error.message}`);
+        }
     }
     async listReservations() {
-        return await this.db.query("SELECT * FROM reservations");
+        return this.db.query(`
+      SELECT 
+        r.id,
+        r.bookId,
+        r.userId,
+        r.reservationDate,
+        u.name as userName,
+        b.title as bookTitle
+      FROM reservations r
+      INNER JOIN users u ON r.userId = u.id
+      INNER JOIN books b ON r.bookId = b.id
+    `);
     }
-    // Métodos do Observer:
+    // ===============================================
+    // Métodos do Observer 
+    // ===============================================
     registerObserver(observer) {
         this.observers.push(observer);
     }

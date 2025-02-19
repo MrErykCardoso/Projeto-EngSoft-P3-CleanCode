@@ -9,7 +9,7 @@ export class Database {
             database: "libra_tech",
             port: 3307,
         });
-        console.log("Conexão com o banco inicializada.");
+        console.log("✅ Conexão com o banco inicializada. ✅");
     }
     static getInstance() {
         if (!Database.instance) {

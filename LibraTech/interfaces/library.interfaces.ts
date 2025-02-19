@@ -40,3 +40,8 @@ export interface IReservation {
   userId: number;
   reservationDate: Date;
 }
+
+export interface IReservationDetails extends IReservation {
+  userName: string;
+  bookTitle: string;
+}

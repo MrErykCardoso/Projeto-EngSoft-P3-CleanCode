@@ -14,7 +14,7 @@ export class Database implements IDatabaseConnection {
       database: "libra_tech",
       port: 3307,
     });
-    console.log("Conexão com o banco inicializada.");
+    console.log("✅ Conexão com o banco inicializada. ✅");
   }
 
   public static getInstance(): Database {

@@ -2,17 +2,15 @@ import { Database } from "./database/database.singleton.js";
 import { BookManager } from "./managers/bookManager.js";
 import { UserManager } from "./managers/userManager.js";
 import { ReservationManager } from "./managers/reservationManager.js";
+import{IReservationDetails} from "./library.interfaces.js"
 import { 
   SearchByTitleStrategy, 
   SearchByAuthorStrategy, 
   SearchByCategoryStrategy, 
   Reservation, 
   Book, 
-  User 
+  User,
 } from "./models/library.models.js";
-
-
-  
 
 // Inicialização do banco e managers
 const db = Database.getInstance();
@@ -22,7 +20,7 @@ const reservationManager = new ReservationManager(db);
 
 async function mainMenu() {
   while (true) {
-    const inquirer = (await import("inquirer")).default; // Importação dinâmica
+    const inquirer = (await import("inquirer")).default;
 
     const { action } = await inquirer.prompt([
       {
@@ -80,7 +78,7 @@ async function cadastrarLivro() {
 
   const newBook = new Book(0, answers.title, answers.author, answers.isbn, answers.category);
   await bookManager.addBook(newBook);
-  console.log("✅ Livro cadastrado com sucesso!");
+  console.log("✅ Livro cadastrado com sucesso! ✅");
 }
 
 async function cadastrarUsuario() {
@@ -93,7 +91,7 @@ async function cadastrarUsuario() {
 
   const newUser = new User(0, answers.name, answers.email, answers.phone);
   await userManager.addUser(newUser);
-  console.log("✅ Usuário cadastrado com sucesso!");
+  console.log("✅ Usuário cadastrado com sucesso! ✅");
 }
 
 async function fazerReserva() {
@@ -101,32 +99,35 @@ async function fazerReserva() {
   const { userEmail } = await inquirer.prompt([{ name: "userEmail", message: "Digite o email do usuário:" }]);
   const user = await userManager.findUserByEmail(userEmail);
   if (!user) {
-    console.log("❌ Usuário não encontrado.");
+    console.log("❌ Usuário não encontrado. ❌");
     return;
   }
 
   const { bookTitle } = await inquirer.prompt([{ name: "bookTitle", message: "Digite o título do livro:" }]);
   const book = await bookManager.findBookByTitle(bookTitle);
   if (!book) {
-    console.log("❌ Livro não encontrado.");
+    console.log("❌ Livro não encontrado. ❌");
     return;
   }
 
   const reservation = new Reservation(0, book.id, user.id, new Date());
   await reservationManager.createReservation(reservation);
-  console.log("✅ Reserva realizada com sucesso!");
+  console.log("✅ Reserva realizada com sucesso! ✅");
 }
 
 async function listarReservas() {
   const reservations = await reservationManager.listReservations();
   if (reservations.length === 0) {
-    console.log("Nenhuma reserva encontrada.");
+    console.log("❌ Nenhuma reserva encontrada. ❌ ");
     return;
   }
 
   console.log("\n=== Reservas ===\n");
-  reservations.forEach((reserva: Reservation) => {
-    console.log(`ID: ${reserva.id}, Usuário: ${reserva.userId}, Livro: ${reserva.bookId}, Data: ${reserva.reservationDate}`);
+  reservations.forEach((reserva: IReservationDetails) => {
+    console.log(`ID: ${reserva.id}`);
+    console.log(`Usuário: ${reserva.userName}`);
+    console.log(`Livro: ${reserva.bookTitle}`);
+    console.log(`Data: ${reserva.reservationDate.toLocaleDateString('pt-BR')}`);
     console.log("----------------------");
   });
 }
@@ -168,9 +169,9 @@ async function buscarLivro() {
 
   const books = await bookManager.searchBooks(param, strategy);
   if (books.length === 0) {
-    console.log("Nenhum livro encontrado.");
+    console.log("❌Nenhum livro encontrado.❌");
   } else {
-    console.log("📚 Livros encontrados:");
+    console.log("📚 Livros encontrados: ✅");
     books.forEach((book) => console.log(`Título: ${book.title}, Autor: ${book.author}, Categoria: ${book.category}`));
   }
 }
