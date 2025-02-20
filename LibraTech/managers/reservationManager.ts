@@ -10,10 +10,11 @@ export class ReservationManager implements ISubject {
   private observers: IObserver[] = [];
 
   constructor(private db: IDatabaseConnection) {}
-    // ===============================================
+    
   // Métodos de Reserva 
-   // ===============================================
-
+  //Cria uma nova reserva no banco de dados
+  //Executa uma query SQL para inserir a reserva no banco de dados.
+  //Notifica os observadores (notifyObservers) sobre a nova reserva.
   public async createReservation(reservation: Reservation): Promise<void> {
     try {
       await this.db.execute(
@@ -26,6 +27,9 @@ export class ReservationManager implements ISubject {
       throw new Error(`Erro ao criar reserva: ${(error as Error).message}`);
     }
   }
+
+ // Lista todas as reservas com detalhes do usuário e do livro.
+//Executa uma query SQL com JOIN para buscar reservas, usuários e livros.
 
   public async listReservations(): Promise<IReservationDetails[]> {
     return this.db.query<IReservationDetails>(`
@@ -41,9 +45,9 @@ export class ReservationManager implements ISubject {
       INNER JOIN books b ON r.bookId = b.id
     `);
   }
-    // ===============================================
+   
   // Métodos do Observer 
-   // ===============================================
+  
 
   public registerObserver(observer: IObserver): void {
     this.observers.push(observer);

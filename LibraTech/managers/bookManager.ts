@@ -7,9 +7,9 @@ import { Book } from "../models/library.models.js";
 export class BookManager {
   constructor(private db: IDatabaseConnection) {}
 
-  // ===============================================
-  // Métodos de CRUD
-  // ===============================================
+  
+  // "Métodos de CRUD"
+  
   public async addBook(book: Book): Promise<void> {
     try {
       // Normalização e validação
@@ -30,13 +30,21 @@ export class BookManager {
     }
   }
 
-  // ===============================================
-  // Métodos de Busca (mantidos e funcionais)
-  // ===============================================
+  
+  // Métodos de Busca 
+
+
+  //Função: Busca livros com base em um termo e uma estratégia de busca (título, autor ou categoria).
+  //Carrega todos os livros do banco de dados.
+  //Aplica a estratégia de busca (strategy.search) para filtrar os livros.
+
   public async searchBooks(term: string, strategy: IBookSearchStrategy): Promise<Book[]> {
     const allBooks = await this.loadAllBooks();
     return strategy.search(allBooks, term);
   }
+  //Função: Busca um livro pelo título exato.
+  //Normaliza o título (remove espaços e converte para minúsculas).
+  //Executa uma query SQL para buscar o livro no banco de dados.
 
   public async findBookByTitle(title: string): Promise<Book | null> {
     const normalizedTitle = title.trim().toLowerCase();
@@ -47,13 +55,14 @@ export class BookManager {
     return books[0] || null;
   }
 
-  // ===============================================
+
   // Métodos Auxiliares (com novas funcionalidades)
-  // ===============================================
+
+ //Normaliza o ISBN (remove hífens e espaços).
   private normalizeISBN(isbn: string): string {
     return isbn.replace(/[-\s]/g, "").trim(); // Remove hífens e espaços
   }
-
+  //Valida o ISBN (verifica se tem 10 ou 13 caracteres).
   private validateISBN(isbn: string): void {
     if (![10, 13].includes(isbn.length)) {
       throw new Error(`ISBN inválido: ${isbn}`);
@@ -64,9 +73,9 @@ export class BookManager {
     return this.db.query<Book>("SELECT * FROM books", []);
   }
 
-  // ===============================================
-  // Novas Funcionalidades Adicionadas (opcional) podemos adiacionar 
-  // ===============================================
+  
+  // Novas Funcionalidades  (opcional) podemos adiacionar ?
+ 
   public async findBookByISBN(isbn: string): Promise<Book | null> {
     const normalizedISBN = this.normalizeISBN(isbn);
     const books = await this.db.query<Book>(
